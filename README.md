@@ -1,6 +1,6 @@
 # Pokedex
 
-## Guided project from boot.dev [https://www.boot.dev/courses/build-pokedex-cli](Link)
+## Guided project from boot.dev [link](https://www.boot.dev/courses/build-pokedex-cli)
 
 ### Description
 
