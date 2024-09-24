@@ -11,7 +11,12 @@ const cliName string = "Pokedex"
 type cliCommand struct {
     name        string
     description string
-    callback    func() error
+    callback    func(conf *config) error
+}
+
+type config struct {
+    Next        any
+    Previous    any
 }
 
 
@@ -26,6 +31,17 @@ var commands map[string]cliCommand = map[string]cliCommand{
             description: "Exit the Pokedex",
             callback:    commandExit,
         },
+        "map": cliCommand{
+            name:        "map",
+            description: "The map command displays the names of 20 location areas in the Pokemon world. Each subsequent call to map should display the next 20 locations, and so on. The idea is that the map command will let us explore the world of Pokemon.",
+            callback:    commandMap,
+
+        },
+        "mapb": cliCommand{
+            name:        "mapb",
+            description: "Displays the previous 20 locations. It's a way to go back.",
+            callback:    commandMapb,
+        },
 }
 
 var tmp_struc map[string]cliCommand = map[string]cliCommand{}
@@ -38,7 +54,7 @@ func printUnkown(text string) {
     fmt.Println(text, ": command not found")
 }
 
-func commandHelp() error {
+func commandHelp(conf *config) error {
     fmt.Printf("Welcome to the %v!\n", cliName)
     fmt.Println("Usage:")
     fmt.Println()
@@ -48,9 +64,44 @@ func commandHelp() error {
     return nil
 }
 
-func commandExit() error {
+func commandExit(conf *config) error {
     os.Exit(0)
     return nil 
+}
+
+func commandMap(conf *config) error {
+    next_url, ok := conf.Next.(string)
+    if !ok {
+        return fmt.Errorf("Next url must be a string")
+    }
+    loc, err := getLocations(next_url) 
+    if err != nil {
+        return err
+    }
+    conf.Next = loc.Next
+    conf.Previous = loc.Previous
+    for _, loc := range loc.Results {
+        fmt.Println(loc.Name)
+    }
+    return nil
+}
+
+func commandMapb(conf *config) error {
+    prev_url, ok := conf.Previous.(string)
+    if !ok {
+        fmt.Println("Start of map, Previous = nil")
+        return nil
+    }
+    loc, err := getLocations(prev_url) 
+    if err != nil {
+        return err
+    }
+    conf.Next = loc.Next
+    conf.Previous = loc.Previous
+    for _, loc := range loc.Results {
+        fmt.Println(loc.Name)
+    }
+    return nil
 }
 
 /*

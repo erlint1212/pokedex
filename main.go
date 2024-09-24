@@ -8,6 +8,7 @@ import (
 func main() {
     // solves the A ref B ref A problem
     tmp_struc = commands
+    config_var := config{"https://pokeapi.co/api/v2/location-area/", nil}
 
     reader := bufio.NewScanner(os.Stdin)
     printPrompt()
@@ -20,7 +21,7 @@ func main() {
            printPrompt()
            continue
         }
-        if err := command.callback(); err != nil {
+        if err := command.callback(&config_var); err != nil {
             fmt.Println(err)
         }
         printPrompt()
