@@ -4,51 +4,10 @@ import (
     "encoding/json"
     "net/http"
     "io"
+    "github.com/erlint1212/pokedex/internal/pokecache"
+    "fmt"
 )
 
-/*
-type NamedAPIResource struct {
-    name    string `json:"name"`
-    url     string  `json:"url"`
-}
-
-type VersionDetails struct {
-    rate        int                 `json:"rate"`
-    version     NamedAPIResource    `json:"version"`
-}
-
-type LocationArea struct {
-    id                      int                     `json:"id"`
-    name                    string                  `json:"name"`
-    game_index              int                     `json:"game_index"`
-    encounter_method_rates  []struct{
-        encounter_method    NamedAPIResource  `json:"encounter_method"`
-        version_details     []struct {
-            rate        int                 `json:"rate"`
-            version     NamedAPIResource    `json:"version"`
-        } `json:"version_details"`
-    }   `json:"encounter_method_rates"`
-    location                NamedAPIResource        `json:"location"`
-    names                   []struct {
-        name        string  `json:"name"`
-        language    NamedAPIResource   `json:"language"`
-    }   `json:"names"`
-    pokemon_encounters      []struct {
-        pokemon     NamedAPIResource    `json:"pokemon"`
-        version_details     []struct{
-            version             NamedAPIResource    `json:"version"`
-            max_chance          int                 `json:"max_chance"`
-            encounter_details   []struct{
-                min_level   int     `json:"min_level"`
-                max_level   int     `json:"max_level"`
-                condition_values    []NamedAPIResource  `json:"condition_values"`
-                chance      int     `json:"chance"`
-                method      NamedAPIResource    `json:"method"`
-            }  `json:"encounter_details"`
-        }  `json:"version_details"`
-    }          `json:"pokemon_encounters"`
-}
-*/
 
 type LocationArea struct {
 	Count    int    `json:"count"`
@@ -61,8 +20,16 @@ type LocationArea struct {
 }
 
 
-func getLocations(url string) (LocationArea, error) {
+func getLocations(c *pokecache.Cache, url string) (LocationArea, error) {
     //url = "https://pokeapi.co/api/v2/location-area/1/"
+    if data, OK := c.Get(url); OK {
+        fmt.Println("Found in cache!")
+        var loc_area LocationArea
+        if err := json.Unmarshal(data, &loc_area); err != nil {
+            return LocationArea{}, err
+        }
+        return loc_area, nil
+    }
 	res, err := http.Get(url)
 	if err != nil {
 		return LocationArea{}, err
@@ -75,16 +42,13 @@ func getLocations(url string) (LocationArea, error) {
 		return LocationArea{}, err
 	}
 
+    c.Add(url, data)
+
 	var loc_area LocationArea
     if err = json.Unmarshal(data, &loc_area); err != nil {
 		return LocationArea{}, err
 	}
-    /*
-	decoder := json.NewDecoder(res.Body)
-	if err := decoder.Decode(&loc_area); err != nil {
-		return LocationArea{}, fmt.Errorf("error decoding response body: %w", err)
-	}
-    */
+
 
 	return loc_area, nil
 }

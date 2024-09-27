@@ -4,6 +4,7 @@ import (
     //"os/exec"
     "os"
     "fmt"
+    "github.com/erlint1212/pokedex/internal/pokecache"
 )
 
 const cliName string = "Pokedex"
@@ -11,7 +12,7 @@ const cliName string = "Pokedex"
 type cliCommand struct {
     name        string
     description string
-    callback    func(conf *config) error
+    callback    func(conf *config, c *pokecache.Cache) error
 }
 
 type config struct {
@@ -54,7 +55,7 @@ func printUnkown(text string) {
     fmt.Println(text, ": command not found")
 }
 
-func commandHelp(conf *config) error {
+func commandHelp(conf *config, c *pokecache.Cache) error {
     fmt.Printf("Welcome to the %v!\n", cliName)
     fmt.Println("Usage:")
     fmt.Println()
@@ -64,17 +65,17 @@ func commandHelp(conf *config) error {
     return nil
 }
 
-func commandExit(conf *config) error {
+func commandExit(conf *config, c *pokecache.Cache) error {
     os.Exit(0)
     return nil 
 }
 
-func commandMap(conf *config) error {
+func commandMap(conf *config, c *pokecache.Cache) error {
     next_url, ok := conf.Next.(string)
     if !ok {
         return fmt.Errorf("Next url must be a string")
     }
-    loc, err := getLocations(next_url) 
+    loc, err := getLocations(c ,next_url) 
     if err != nil {
         return err
     }
@@ -86,13 +87,13 @@ func commandMap(conf *config) error {
     return nil
 }
 
-func commandMapb(conf *config) error {
+func commandMapb(conf *config, c *pokecache.Cache) error {
     prev_url, ok := conf.Previous.(string)
     if !ok {
         fmt.Println("Start of map, Previous = nil")
         return nil
     }
-    loc, err := getLocations(prev_url) 
+    loc, err := getLocations(c, prev_url) 
     if err != nil {
         return err
     }
