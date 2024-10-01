@@ -12,7 +12,7 @@ const cliName string = "Pokedex"
 type cliCommand struct {
     name        string
     description string
-    callback    func(conf *config, c *pokecache.Cache) error
+    callback    func(conf *config, c *pokecache.Cache, area_name string) error
 }
 
 type config struct {
@@ -43,6 +43,11 @@ var commands map[string]cliCommand = map[string]cliCommand{
             description: "Displays the previous 20 locations. It's a way to go back.",
             callback:    commandMapb,
         },
+        "explore": cliCommand{
+            name:        "explore",
+            description: "Shows all the locations for a area",
+            callback:    commandExplore,
+        },
 }
 
 var tmp_struc map[string]cliCommand = map[string]cliCommand{}
@@ -55,7 +60,7 @@ func printUnkown(text string) {
     fmt.Println(text, ": command not found")
 }
 
-func commandHelp(conf *config, c *pokecache.Cache) error {
+func commandHelp(conf *config, c *pokecache.Cache, area_name string) error {
     fmt.Printf("Welcome to the %v!\n", cliName)
     fmt.Println("Usage:")
     fmt.Println()
@@ -65,12 +70,12 @@ func commandHelp(conf *config, c *pokecache.Cache) error {
     return nil
 }
 
-func commandExit(conf *config, c *pokecache.Cache) error {
+func commandExit(conf *config, c *pokecache.Cache, area_name string) error {
     os.Exit(0)
     return nil 
 }
 
-func commandMap(conf *config, c *pokecache.Cache) error {
+func commandMap(conf *config, c *pokecache.Cache, area_name string) error {
     next_url, ok := conf.Next.(string)
     if !ok {
         return fmt.Errorf("Next url must be a string")
@@ -87,7 +92,7 @@ func commandMap(conf *config, c *pokecache.Cache) error {
     return nil
 }
 
-func commandMapb(conf *config, c *pokecache.Cache) error {
+func commandMapb(conf *config, c *pokecache.Cache, area_name string) error {
     prev_url, ok := conf.Previous.(string)
     if !ok {
         fmt.Println("Start of map, Previous = nil")
@@ -101,6 +106,20 @@ func commandMapb(conf *config, c *pokecache.Cache) error {
     conf.Previous = loc.Previous
     for _, loc := range loc.Results {
         fmt.Println(loc.Name)
+    }
+    return nil
+}
+
+func commandExplore(conf *config, c *pokecache.Cache, area_name string) error {
+    fmt.Printf("Exploring %s...\n", area_name)
+    url := "https://pokeapi.co/api/v2/location-area/" + area_name
+    loc_end, err := getExplore(c, url)
+    if err != nil {
+        return err
+    }
+    fmt.Println("Found Pokemon:")
+    for _, pokemon_encounter := range loc_end.PokemonEncounters {
+        fmt.Println(" - ", pokemon_encounter.Pokemon.Name)
     }
     return nil
 }

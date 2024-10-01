@@ -5,6 +5,7 @@ import (
     "os"
     "github.com/erlint1212/pokedex/internal/pokecache"
     "time"
+    "strings"
 )
 
 func main() {
@@ -17,16 +18,23 @@ func main() {
     printPrompt()
 
     for reader.Scan() {
-        text := reader.Text()
-        command, OK := commands[text]
+        text := strings.Fields(reader.Text())
+        command, OK := commands[text[0]]
         if !OK {
-           printUnkown(text) 
+           printUnkown(text[0]) 
            printPrompt()
            continue
         }
-        if err := command.callback(&config_var, &cache); err != nil {
-            fmt.Println(err)
+        if len(text) == 1 {
+            if err := command.callback(&config_var, &cache, ""); err != nil {
+                fmt.Println(err)
+            }
+        } else if len(text) > 1 {
+            if err := command.callback(&config_var, &cache, text[1]); err != nil {
+                fmt.Println(err)
+            }
         }
+
         printPrompt()
     }
     fmt.Println()
