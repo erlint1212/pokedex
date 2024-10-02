@@ -16,3 +16,6 @@ A REPL, or Read-Eval-Print Loop, is a simple interactive programming environment
 * Get hands-on practice with local Go development and tooling
 * Learn about caching and how to use it to improve performance
 
+### Improvements
+
+* Make it so cache and API functions only send relevant information instead of the whole API response, memory efficency.
