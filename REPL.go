@@ -61,6 +61,11 @@ var commands map[string]cliCommand = map[string]cliCommand{
             description: "Inspect your caught pokemon",
             callback:    commandInspect,
         },
+        "pokedex": cliCommand{
+            name:        "pokedex",
+            description: "See names of all caught pokemon",
+            callback:    commandPokedex,
+        },
 }
 
 var tmp_struc map[string]cliCommand = map[string]cliCommand{}
@@ -178,6 +183,14 @@ func commandInspect(conf *config, c *pokecache.Cache, arg string) error {
     fmt.Println("Types:")
     for _, item := range data.Types {
         fmt.Printf("  - %s\n", item.Type.Name)
+    }
+    return nil
+}
+
+func commandPokedex(conf *config, c *pokecache.Cache, arg string) error {
+    fmt.Println("Your Pokedex:")
+    for name, _ := range Pokedex {
+        fmt.Println(" - ", name)
     }
     return nil
 }
